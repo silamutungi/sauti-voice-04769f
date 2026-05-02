@@ -36,6 +36,8 @@ It is a 5-day onboarding, training, and certification platform that helps Kenyan
 
 - [2026-05-02] Add navigation to sign in and sign up pages to match the homepage → src/pages/Login.tsx, src/pages/Signup.tsx
 
+- [2026-05-02] Wrap the app logo in the nav component with a React Router Link to '/' so clicking it returns to the → src/components/Navbar.tsx
+
 ## Brain Observations
 <!-- Proactive hints Brain has surfaced -->
 <!-- Format: [date] category: observation -->

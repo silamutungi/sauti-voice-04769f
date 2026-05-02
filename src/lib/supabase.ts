@@ -4,8 +4,12 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const supabaseSchema = (import.meta.env.VITE_SUPABASE_SCHEMA as string) || 'public'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  db: { schema: supabaseSchema },
-})
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-anon-key',
+  {
+    db: { schema: supabaseSchema },
+  }
+)
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)

@@ -34,27 +34,73 @@ export default function Dashboard() {
   async function loadProgress() {
     setLoading(true)
     setError('')
+
+    // Not configured: use mock data, never show error
     if (!isSupabaseConfigured) {
       setTimeout(() => { setCompletedIds(['1']); setCurrentDay(1); setLoading(false) }, 600)
       return
     }
+
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { setLoading(false); return }
-      const { data, error: fetchError } = await (supabase.from('sauti_progress').select('*').eq('user_id', session.user.id) as any)
-      if (fetchError) throw fetchError
+      // Step 1: Auth check
+      let session = null
+      try {
+        const { data, error: authError } = await supabase.auth.getSession()
+        if (authError) {
+          console.error('[Dashboard] Auth error:', authError.message)
+        } else {
+          session = data.session
+        }
+      } catch (authEx) {
+        console.error('[Dashboard] Auth exception:', authEx)
+      }
+
+      // No session: show empty state gracefully, not an error
+      if (!session) {
+        console.warn('[Dashboard] No active session — showing empty progress.')
+        setCompletedIds([])
+        setCurrentDay(1)
+        setLoading(false)
+        return
+      }
+
+      // Step 2: Fetch progress rows
+      const { data, error: fetchError } = await (supabase
+        .from('sauti_progress')
+        .select('lesson_id')
+        .eq('user_id', session.user.id) as any)
+
+      if (fetchError) {
+        // Log the specific Supabase error code and message for diagnosis
+        console.error('[Dashboard] Fetch error — code:', fetchError.code, '| message:', fetchError.message, '| details:', fetchError.details, '| hint:', fetchError.hint)
+
+        // If the table doesn't exist (42P01) or permission denied (42501 / PGRST301),
+        // fall back to empty state instead of showing the error banner.
+        const knownFallbackCodes = ['42P01', '42501', 'PGRST301', 'PGRST116']
+        if (knownFallbackCodes.includes(fetchError.code) || fetchError.code?.startsWith('PGRST')) {
+          console.warn('[Dashboard] Schema/permission issue — showing empty progress as fallback.')
+          setCompletedIds([])
+          setCurrentDay(1)
+          setLoading(false)
+          return
+        }
+
+        // For all other errors (network, unknown) show the error state
+        throw fetchError
+      }
+
+      // Step 3: Parse and set state
       const ids = (data || []).map((r: { lesson_id: string }) => r.lesson_id)
-      setCompletedIds(ids)
-      const completedDays = new Set(SEED_LESSONS.filter(l => ids.includes(l.id)).map(l => l.day))
       let day = 1
       for (let d = 1; d <= 5; d++) {
         const dayLessons = SEED_LESSONS.filter(l => l.day === d)
         if (dayLessons.every(l => ids.includes(l.id))) day = d + 1
       }
-      setCurrentDay(Math.min(day, 5))
       setCompletedIds(ids)
-      completedDays.size
-    } catch {
+      setCurrentDay(Math.min(day, 5))
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      console.error('[Dashboard] loadProgress failed:', message)
       setError('Failed to load progress. Please try again.')
     } finally {
       setLoading(false)

@@ -34,6 +34,8 @@ It is a 5-day onboarding, training, and certification platform that helps Kenyan
 
 - [2026-05-02] Add a responsive mobile hamburger nav drawer to the site navigation component. Use useState for open → src/components/Navbar.tsx
 
+- [2026-05-02] Add navigation to sign in and sign up pages to match the homepage → src/pages/Login.tsx, src/pages/Signup.tsx
+
 ## Brain Observations
 <!-- Proactive hints Brain has surfaced -->
 <!-- Format: [date] category: observation -->

@@ -86,16 +86,16 @@ export default function Navbar() {
         />
       )}
 
-      {/* Mobile slide-in drawer */}
+      {/* Mobile slide-in drawer — slides in from left */}
       <div
         id="mobile-drawer"
         ref={drawerRef}
-        className="fixed top-0 right-0 h-full w-72 z-50 md:hidden flex flex-col transform transition-transform duration-300 ease-in-out"
+        className="fixed top-0 left-0 h-full w-72 z-50 md:hidden flex flex-col transform transition-transform duration-300 ease-in-out"
         style={{
           backgroundColor: 'var(--color-bg-surface)',
-          borderLeft: '1px solid var(--color-border)',
-          transform: open ? 'translateX(0)' : 'translateX(100%)',
-          boxShadow: open ? '-4px 0 24px rgba(0,0,0,0.12)' : 'none',
+          borderRight: '1px solid var(--color-border)',
+          transform: open ? 'translateX(0)' : 'translateX(-100%)',
+          boxShadow: open ? '4px 0 24px rgba(0,0,0,0.12)' : 'none',
         }}
         aria-hidden={!open}
       >
@@ -123,8 +123,9 @@ export default function Navbar() {
                 className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors"
                 style={{
                   color: isActive ? 'var(--color-primary)' : 'var(--color-text)',
-                  backgroundColor: isActive ? 'rgba(30,64,175,0.08)' : 'transparent',
+                  backgroundColor: isActive ? 'rgba(239,68,68,0.10)' : 'transparent',
                   fontWeight: isActive ? 600 : 500,
+                  borderLeft: isActive ? '3px solid var(--color-primary)' : '3px solid transparent',
                 }}
               >
                 <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />

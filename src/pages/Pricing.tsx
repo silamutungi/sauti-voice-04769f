@@ -57,7 +57,7 @@ export default function Pricing() {
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-20">
           {plans.map((plan) => (
-            <Card key={plan.name} className={plan.highlight ? 'ring-2' : ''} style={plan.highlight ? { ringColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' } : {}}>
+            <Card key={plan.name} className={plan.highlight ? 'ring-2 ring-[color:var(--color-primary)]' : ''} style={plan.highlight ? { borderColor: 'var(--color-primary)' } : {}}>
               <CardHeader>
                 <div className="flex items-center gap-2 mb-1">
                   <CardTitle>{plan.name}</CardTitle>

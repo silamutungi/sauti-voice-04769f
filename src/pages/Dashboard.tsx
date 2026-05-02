@@ -4,7 +4,7 @@ import { CheckCircle, Circle, Award, RefreshCw, Loader2, Mic, BookOpen, HelpCirc
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent, CardTitle } from '../components/ui/card'
 import Navbar from '../components/Navbar'
 import type { SeedLesson } from '../types'
 

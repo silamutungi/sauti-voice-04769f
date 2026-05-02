@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-05-02T00:31:44.373Z",
+  "appName": "Sauti Voice",
+  "category": "productivity",
+  "pages": [
+    {
+      "id": "home",
+      "name": "Home",
+      "route": "/home",
+      "filePath": "src/pages/Home.tsx",
+      "sections": []
+    },
+    {
+      "id": "login",
+      "name": "Login",
+      "route": "/login",
+      "filePath": "src/pages/Login.tsx",
+      "sections": []
+    },
+    {
+      "id": "signup",
+      "name": "Signup",
+      "route": "/signup",
+      "filePath": "src/pages/Signup.tsx",
+      "sections": []
+    },
+    {
+      "id": "dashboard",
+      "name": "Dashboard",
+      "route": "/dashboard",
+      "filePath": "src/pages/Dashboard.tsx",
+      "sections": [
+        "Completed"
+      ]
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "route": "/settings",
+      "filePath": "src/pages/Settings.tsx",
+      "sections": []
+    },
+    {
+      "id": "pricing",
+      "name": "Pricing",
+      "route": "/pricing",
+      "filePath": "src/pages/Pricing.tsx",
+      "sections": []
+    }
+  ],
+  "features": [
+    "auth",
+    "crud"
+  ],
+  "completenessScore": 67,
+  "completenessGaps": [
+    "Missing page: Landing (/)",
+    "Add empty state UI for lists with no data",
+    "Add error boundary or error state handling"
+  ]
+}

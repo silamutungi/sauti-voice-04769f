@@ -47,7 +47,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b" style={{ backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border)' }}>
       <div className="max-w-5xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="font-display font-bold text-xl" style={{ color: 'var(--color-primary)' }}>Sauti Voice</Link>
+        <Link to="/" className="font-display font-bold text-xl" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>Sauti Voice</Link>
         <nav className="hidden md:flex items-center gap-2">
           {navItems.map(({ label, href, icon: Icon }) => (
             <Link
@@ -101,7 +101,7 @@ export default function Navbar() {
       >
         {/* Drawer header */}
         <div className="h-16 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-          <Link to="/" onClick={() => setOpen(false)} className="font-display font-bold text-lg" style={{ color: 'var(--color-primary)' }}>Sauti Voice</Link>
+          <Link to="/" onClick={() => setOpen(false)} className="font-display font-bold text-lg" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>Sauti Voice</Link>
           <button
             className="flex items-center justify-center w-9 h-9 rounded-lg"
             onClick={() => setOpen(false)}

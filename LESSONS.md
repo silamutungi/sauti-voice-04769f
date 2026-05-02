@@ -24,6 +24,8 @@ It is a 5-day onboarding, training, and certification platform that helps Kenyan
 
 - [2026-05-02] Pattern after 3 edits: This founder is systematically eliminating blockers to deployment by fixing runtime errors, improving UX consistency, and resolving TypeScript issues before they can ship.
 
+- [2026-05-02] Pattern after 3 edits: This founder is systematically eliminating blocking issues—broken functionality, inconsistent UX, and deployment-preventing errors—to ship a working product.
+
 ## Edit History
 <!-- Brain appends after every edit -->
 <!-- Format: [date] instruction → files changed → outcome -->

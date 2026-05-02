@@ -26,6 +26,8 @@ It is a 5-day onboarding, training, and certification platform that helps Kenyan
 <!-- Brain appends after every edit -->
 <!-- Format: [date] instruction → files changed → outcome -->
 
+- [2026-05-02] Add a responsive mobile hamburger nav drawer to the site navigation component. Use useState for open → src/components/Navbar.tsx
+
 ## Brain Observations
 <!-- Proactive hints Brain has surfaced -->
 <!-- Format: [date] category: observation -->

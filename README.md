@@ -34,3 +34,29 @@ Vercel: https://vercel.com/dashboard
 Supabase: https://supabase.com/dashboard
 
 Visila provisioned this. You own it entirely.
+
+## NEXT STEPS
+
+### Deployment Instructions
+
+1. **Connect your repository**: Link this GitHub repo to Vercel
+2. **Set environment variables**: Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to Vercel project settings
+3. **Deploy**: Push to main branch for automatic deployment
+4. **Monitor**: Check Vercel dashboard for build logs and analytics
+
+### Feature Roadmap
+
+- [ ] [Core feature 1] - Description and target date
+- [ ] [Core feature 2] - Description and target date
+- [ ] [Enhancement 1] - Description and target date
+- [ ] [Performance improvement] - Description and target date
+- [ ] [User feedback integration] - Description and target date
+
+### Development Guidelines
+
+- **Code style**: Follow existing patterns in the codebase
+- **Commits**: Use clear, descriptive commit messages
+- **Testing**: Test locally before pushing to main
+- **Environment**: Always use `.env.example` as template for local setup
+- **Documentation**: Update this README when adding significant features
+- **Pull requests**: Create PRs for review before merging to main

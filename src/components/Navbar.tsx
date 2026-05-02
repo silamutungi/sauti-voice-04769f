@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { LogOut, Menu, X, LayoutDashboard, BookOpen, Settings } from 'lucide-react'
 
@@ -15,6 +15,27 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [open, setOpen] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open])
 
   async function handleLogout() {
     if (isSupabaseConfigured) {
@@ -48,26 +69,83 @@ export default function Navbar() {
             className="md:hidden flex items-center justify-center w-11 h-11 rounded-lg"
             onClick={() => setOpen(!open)}
             aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="mobile-drawer"
           >
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
+
+      {/* Mobile drawer backdrop */}
       {open && (
-        <div className="md:hidden border-t px-4 py-4 space-y-1" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-surface)' }}>
-          {navItems.map(({ label, href, icon: Icon }) => (
-            <Link key={label} to={href} onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium"
-              style={{ color: location.pathname === href ? 'var(--color-primary)' : 'var(--color-text)' }}
-            >
-              <Icon size={16} />{label}
-            </Link>
-          ))}
-          <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium w-full" style={{ color: 'var(--color-error)' }}>
-            <LogOut size={16} />Log out
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile slide-in drawer */}
+      <div
+        id="mobile-drawer"
+        ref={drawerRef}
+        className="fixed top-0 right-0 h-full w-72 z-50 md:hidden flex flex-col transform transition-transform duration-300 ease-in-out"
+        style={{
+          backgroundColor: 'var(--color-bg-surface)',
+          borderLeft: '1px solid var(--color-border)',
+          transform: open ? 'translateX(0)' : 'translateX(100%)',
+          boxShadow: open ? '-4px 0 24px rgba(0,0,0,0.12)' : 'none',
+        }}
+        aria-hidden={!open}
+      >
+        {/* Drawer header */}
+        <div className="h-16 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <span className="font-display font-bold text-lg" style={{ color: 'var(--color-primary)' }}>Sauti Voice</span>
+          <button
+            className="flex items-center justify-center w-9 h-9 rounded-lg"
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={20} style={{ color: 'var(--color-text-secondary)' }} />
           </button>
         </div>
-      )}
+
+        {/* Drawer nav links */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+          {navItems.map(({ label, href, icon: Icon }) => {
+            const isActive = location.pathname === href
+            return (
+              <Link
+                key={label}
+                to={href}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  color: isActive ? 'var(--color-primary)' : 'var(--color-text)',
+                  backgroundColor: isActive ? 'rgba(30,64,175,0.08)' : 'transparent',
+                  fontWeight: isActive ? 600 : 500,
+                }}
+              >
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                {label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Drawer footer with logout */}
+        <div className="px-3 py-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+          <button
+            onClick={() => { setOpen(false); handleLogout() }}
+            className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium w-full transition-colors"
+            style={{ color: 'var(--color-error)' }}
+          >
+            <LogOut size={18} />
+            Log out
+          </button>
+        </div>
+      </div>
     </header>
   )
 }

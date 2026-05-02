@@ -101,7 +101,7 @@ export default function Navbar() {
       >
         {/* Drawer header */}
         <div className="h-16 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-          <span className="font-display font-bold text-lg" style={{ color: 'var(--color-primary)' }}>Sauti Voice</span>
+          <Link to="/" onClick={() => setOpen(false)} className="font-display font-bold text-lg" style={{ color: 'var(--color-primary)' }}>Sauti Voice</Link>
           <button
             className="flex items-center justify-center w-9 h-9 rounded-lg"
             onClick={() => setOpen(false)}

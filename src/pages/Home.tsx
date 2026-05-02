@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom'
-import { CheckCircle, Mic, Award, TrendingUp, Users, Shield } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { CheckCircle, Mic, Award, TrendingUp, Users, Shield, Menu, X } from 'lucide-react'
 
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
@@ -14,20 +15,112 @@ const features = [
   { icon: '💰', title: 'Sub-KES 1,000/month', desc: 'World-class training at emerging-market pricing — accessible to every graduate.' },
 ]
 
+const navLinks = [
+  { to: '/pricing', label: 'Pricing' },
+  { to: '/login', label: 'Log in' },
+  { to: '/signup', label: 'Start free' },
+]
+
 export default function Home() {
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const location = useLocation()
+
+  const isActive = (path: string) => location.pathname === path
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg)' }}>
+      {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b" style={{ borderColor: 'var(--color-border)' }}>
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="font-display font-bold text-xl" style={{ color: 'var(--color-primary)' }}>Sauti Voice</Link>
+
+          {/* Desktop nav */}
           <div className="flex items-center gap-4">
             <Link to="/pricing" className="hidden md:block text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Pricing</Link>
             <Link to="/login"><Button variant="outline" className="hidden md:inline-flex">Log in</Button></Link>
             <Link to="/signup"><Button>Start free</Button></Link>
+
+            {/* Hamburger button — mobile only */}
+            <button
+              className="md:hidden flex items-center justify-center w-9 h-9 rounded-md"
+              style={{ color: 'var(--color-text)' }}
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open navigation menu"
+              aria-expanded={drawerOpen}
+            >
+              <Menu size={22} strokeWidth={2} />
+            </button>
           </div>
         </div>
       </nav>
 
+      {/* Mobile drawer overlay */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.45)' }}
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile slide-in drawer */}
+      <div
+        className="fixed top-0 right-0 h-full w-72 z-50 md:hidden flex flex-col"
+        style={{
+          backgroundColor: 'var(--color-bg-surface)',
+          transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+          boxShadow: drawerOpen ? '-8px 0 32px rgba(15,23,42,0.18)' : 'none',
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-6 h-16 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <span className="font-display font-bold text-lg" style={{ color: 'var(--color-primary)' }}>Sauti Voice</span>
+          <button
+            className="flex items-center justify-center w-9 h-9 rounded-md"
+            style={{ color: 'var(--color-text)' }}
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close navigation menu"
+          >
+            <X size={20} strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Drawer links */}
+        <nav className="flex flex-col px-4 pt-4 gap-1">
+          {navLinks.map(({ to, label }) => {
+            const active = isActive(to)
+            return (
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setDrawerOpen(false)}
+                className="px-4 py-3 rounded-lg text-base font-medium transition-colors"
+                style={{
+                  color: active ? 'var(--color-primary)' : 'var(--color-text)',
+                  backgroundColor: active ? 'rgba(30, 64, 175, 0.08)' : 'transparent',
+                  fontWeight: active ? 600 : 500,
+                }}
+              >
+                {label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Drawer CTA */}
+        <div className="mt-auto px-6 pb-10 pt-6 border-t" style={{ borderColor: 'var(--color-border)' }}>
+          <Link to="/signup" onClick={() => setDrawerOpen(false)}>
+            <Button className="w-full text-base">Start free today</Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* HERO */}
       <section
         className="relative min-h-[100svh] flex items-center overflow-hidden"
         style={{

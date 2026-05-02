@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, Circle, Award, RefreshCw, Loader2, Mic, BookOpen, HelpCircle, Video } from 'lucide-react'
+import { CheckCircle, Circle, Award, RefreshCw, Loader2, Mic, BookOpen, HelpCircle, Video, Lock, ChevronRight, Trophy } from 'lucide-react'
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { Button } from '../components/ui/button'
@@ -22,6 +22,166 @@ const SEED_LESSONS: SeedLesson[] = [
 
 const TYPE_ICON: Record<string, typeof Mic> = { audio: Mic, reading: BookOpen, quiz: HelpCircle, video: Video }
 
+function CertificationPath({ completedIds, currentDay }: { completedIds: string[], currentDay: number }) {
+  const days = [1, 2, 3, 4, 5]
+  const dayLabels: Record<number, string> = {
+    1: 'Foundations',
+    2: 'Products',
+    3: 'Client Skills',
+    4: 'Objections',
+    5: 'Certification',
+  }
+
+  return (
+    <Card className="mb-8">
+      <CardContent className="py-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display font-semibold" style={{ fontSize: 'var(--text-title-3)', color: 'var(--color-text)' }}>Certification Path</h2>
+          <Trophy size={20} style={{ color: 'var(--color-accent)' }} />
+        </div>
+        <div className="flex items-center gap-0">
+          {days.map((day, idx) => {
+            const dayLessons = SEED_LESSONS.filter(l => l.day === day)
+            const dayDone = dayLessons.every(l => completedIds.includes(l.id))
+            const isActive = day === currentDay && !dayDone
+            const locked = day > currentDay
+            const isLast = idx === days.length - 1
+
+            return (
+              <div key={day} className="flex items-center" style={{ flex: isLast ? 'none' : 1 }}>
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                    style={{
+                      backgroundColor: dayDone
+                        ? 'var(--color-accent)'
+                        : isActive
+                        ? 'var(--color-primary)'
+                        : locked
+                        ? 'var(--color-border)'
+                        : 'var(--color-border)',
+                      border: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
+                      boxShadow: isActive ? '0 0 0 3px rgba(30,64,175,0.15)' : 'none',
+                    }}
+                  >
+                    {dayDone ? (
+                      <CheckCircle size={18} color="white" />
+                    ) : locked ? (
+                      <Lock size={16} style={{ color: 'var(--color-text-muted)' }} />
+                    ) : (
+                      <span className="text-sm font-bold" style={{ color: isActive ? 'white' : 'var(--color-text-muted)' }}>{day}</span>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-medium" style={{ color: dayDone ? 'var(--color-accent)' : isActive ? 'var(--color-primary)' : 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+                      Day {day}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{dayLabels[day]}</p>
+                    {dayDone && <p className="text-xs font-semibold" style={{ color: 'var(--color-accent)' }}>Done</p>}
+                    {isActive && <p className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>Active</p>}
+                    {locked && <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Locked</p>}
+                  </div>
+                </div>
+                {!isLast && (
+                  <div
+                    className="h-0.5 flex-1 mx-1 mb-7 transition-all duration-500"
+                    style={{ backgroundColor: dayDone ? 'var(--color-accent)' : 'var(--color-border)' }}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Next Step guidance */}
+        {(() => {
+          const allDone = SEED_LESSONS.every(l => completedIds.includes(l.id))
+          if (allDone) {
+            return (
+              <div className="mt-5 flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.2)' }}>
+                <Trophy size={18} style={{ color: 'var(--color-accent)' }} />
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>All days complete — download your certificate below!</p>
+              </div>
+            )
+          }
+          const nextLesson = SEED_LESSONS.find(l => !completedIds.includes(l.id))
+          return nextLesson ? (
+            <div className="mt-5 flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: 'rgba(30,64,175,0.06)', border: '1px solid rgba(30,64,175,0.15)' }}>
+              <ChevronRight size={18} style={{ color: 'var(--color-primary)' }} />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Next Step</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>{nextLesson.title}</p>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Day {nextLesson.day} · {nextLesson.duration_minutes} min · {nextLesson.type}</p>
+              </div>
+            </div>
+          ) : null
+        })()}
+      </CardContent>
+    </Card>
+  )
+}
+
+function ProgressSummaryCard({ completedIds, currentDay }: { completedIds: string[], currentDay: number }) {
+  const totalLessons = SEED_LESSONS.length
+  const completedCount = completedIds.length
+  const progressPct = Math.round((completedCount / totalLessons) * 100)
+  const nextLesson = SEED_LESSONS.find(l => !completedIds.includes(l.id))
+
+  return (
+    <Card className="mb-8">
+      <CardContent className="py-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display font-semibold" style={{ fontSize: 'var(--text-title-3)', color: 'var(--color-text)' }}>Progress Summary</h2>
+          <Badge
+            className="text-xs font-semibold"
+            style={{
+              backgroundColor: progressPct === 100 ? 'rgba(5,150,105,0.1)' : 'rgba(30,64,175,0.08)',
+              color: progressPct === 100 ? 'var(--color-accent)' : 'var(--color-primary)',
+              border: 'none',
+            }}
+          >
+            {progressPct}% Complete
+          </Badge>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mb-5">
+          <div className="text-center p-3 rounded-xl" style={{ backgroundColor: 'rgba(30,64,175,0.06)' }}>
+            <p className="font-display font-bold text-2xl" style={{ color: 'var(--color-primary)' }}>{completedCount}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>of {totalLessons} lessons</p>
+          </div>
+          <div className="text-center p-3 rounded-xl" style={{ backgroundColor: 'rgba(30,64,175,0.06)' }}>
+            <p className="font-display font-bold text-2xl" style={{ color: 'var(--color-primary)' }}>Day {currentDay}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>current day</p>
+          </div>
+          <div className="text-center p-3 rounded-xl" style={{ backgroundColor: completedCount === totalLessons ? 'rgba(5,150,105,0.08)' : 'rgba(30,64,175,0.06)' }}>
+            <p className="font-display font-bold text-2xl" style={{ color: completedCount === totalLessons ? 'var(--color-accent)' : 'var(--color-primary)' }}>
+              {completedCount === totalLessons ? '🏆' : `${5 - currentDay + 1}d`}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{completedCount === totalLessons ? 'certified' : 'days left'}</p>
+          </div>
+        </div>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>Overall progress</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>{completedCount} of {totalLessons} lessons</span>
+          </div>
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-border)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progressPct}%`, backgroundColor: progressPct === 100 ? 'var(--color-accent)' : 'var(--color-primary)' }}
+            />
+          </div>
+        </div>
+        {nextLesson && completedCount < totalLessons && (
+          <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <ChevronRight size={14} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+            <span>Up next: <span className="font-semibold" style={{ color: 'var(--color-text)' }}>{nextLesson.title}</span></span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function Dashboard() {
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [currentDay, setCurrentDay] = useState(1)
@@ -31,18 +191,31 @@ export default function Dashboard() {
 
   useEffect(() => { loadProgress() }, [])
 
+  // Recompute currentDay whenever completedIds changes
+  function computeCurrentDay(ids: string[]): number {
+    let day = 1
+    for (let d = 1; d <= 5; d++) {
+      const dayLessons = SEED_LESSONS.filter(l => l.day === d)
+      if (dayLessons.every(l => ids.includes(l.id))) day = d + 1
+    }
+    return Math.min(day, 5)
+  }
+
   async function loadProgress() {
     setLoading(true)
     setError('')
 
-    // Not configured: use mock data, never show error
     if (!isSupabaseConfigured) {
-      setTimeout(() => { setCompletedIds(['1']); setCurrentDay(1); setLoading(false) }, 600)
+      setTimeout(() => {
+        const ids = ['1']
+        setCompletedIds(ids)
+        setCurrentDay(computeCurrentDay(ids))
+        setLoading(false)
+      }, 600)
       return
     }
 
     try {
-      // Step 1: Auth check
       let session = null
       try {
         const { data, error: authError } = await supabase.auth.getSession()
@@ -55,7 +228,6 @@ export default function Dashboard() {
         console.error('[Dashboard] Auth exception:', authEx)
       }
 
-      // No session: show empty state gracefully, not an error
       if (!session) {
         console.warn('[Dashboard] No active session — showing empty progress.')
         setCompletedIds([])
@@ -64,18 +236,13 @@ export default function Dashboard() {
         return
       }
 
-      // Step 2: Fetch progress rows
       const { data, error: fetchError } = await (supabase
         .from('sauti_progress')
         .select('lesson_id')
         .eq('user_id', session.user.id) as any)
 
       if (fetchError) {
-        // Log the specific Supabase error code and message for diagnosis
         console.error('[Dashboard] Fetch error — code:', fetchError.code, '| message:', fetchError.message, '| details:', fetchError.details, '| hint:', fetchError.hint)
-
-        // If the table doesn't exist (42P01) or permission denied (42501 / PGRST301),
-        // fall back to empty state instead of showing the error banner.
         const knownFallbackCodes = ['42P01', '42501', 'PGRST301', 'PGRST116']
         if (knownFallbackCodes.includes(fetchError.code) || fetchError.code?.startsWith('PGRST')) {
           console.warn('[Dashboard] Schema/permission issue — showing empty progress as fallback.')
@@ -84,20 +251,12 @@ export default function Dashboard() {
           setLoading(false)
           return
         }
-
-        // For all other errors (network, unknown) show the error state
         throw fetchError
       }
 
-      // Step 3: Parse and set state
       const ids = (data || []).map((r: { lesson_id: string }) => r.lesson_id)
-      let day = 1
-      for (let d = 1; d <= 5; d++) {
-        const dayLessons = SEED_LESSONS.filter(l => l.day === d)
-        if (dayLessons.every(l => ids.includes(l.id))) day = d + 1
-      }
       setCompletedIds(ids)
-      setCurrentDay(Math.min(day, 5))
+      setCurrentDay(computeCurrentDay(ids))
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err)
       console.error('[Dashboard] loadProgress failed:', message)
@@ -111,13 +270,24 @@ export default function Dashboard() {
     if (completedIds.includes(lessonId)) return
     setMarking(lessonId)
     if (!isSupabaseConfigured) {
-      setTimeout(() => { setCompletedIds(prev => [...prev, lessonId]); setMarking(null) }, 500)
+      setTimeout(() => {
+        setCompletedIds(prev => {
+          const updated = [...prev, lessonId]
+          setCurrentDay(computeCurrentDay(updated))
+          return updated
+        })
+        setMarking(null)
+      }, 500)
       return
     }
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { setMarking(null); return }
     await (supabase.from('sauti_progress').insert({ user_id: session.user.id, lesson_id: lessonId, score: null } as any) as any)
-    setCompletedIds(prev => [...prev, lessonId])
+    setCompletedIds(prev => {
+      const updated = [...prev, lessonId]
+      setCurrentDay(computeCurrentDay(updated))
+      return updated
+    })
     setMarking(null)
   }
 
@@ -125,6 +295,7 @@ export default function Dashboard() {
   const completedCount = completedIds.length
   const progressPct = Math.round((completedCount / totalLessons) * 100)
   const days = [1, 2, 3, 4, 5]
+  const allComplete = completedCount === totalLessons
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg)' }}>
@@ -141,26 +312,28 @@ export default function Dashboard() {
           <p style={{ color: 'var(--color-text-secondary)' }}>Day {currentDay} of 5 — keep going, you are making progress.</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[{ label: 'Lessons Done', value: `${completedCount}/${totalLessons}` }, { label: 'Progress', value: `${progressPct}%` }, { label: 'Current Day', value: `Day ${currentDay}` }, { label: 'Certificate', value: completedCount === totalLessons ? 'Earned' : 'Pending' }].map(({ label, value }) => (
+        {/* Stats cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Lessons Done', value: `${completedCount}/${totalLessons}` },
+            { label: 'Progress', value: `${progressPct}%` },
+            { label: 'Current Day', value: `Day ${currentDay}` },
+            { label: 'Certificate', value: allComplete ? 'Earned 🏆' : 'Pending' },
+          ].map(({ label, value }) => (
             <Card key={label}>
               <CardContent className="pt-5">
                 <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)', letterSpacing: 'var(--tracking-overline)' }}>{label}</p>
-                <p className="font-display font-bold text-2xl" style={{ color: 'var(--color-primary)' }}>{value}</p>
+                <p className="font-display font-bold text-2xl" style={{ color: label === 'Certificate' && allComplete ? 'var(--color-accent)' : 'var(--color-primary)' }}>{value}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Overall progress</span>
-            <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>{progressPct}%</span>
-          </div>
-          <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-border)' }}>
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPct}%`, backgroundColor: 'var(--color-primary)' }} />
-          </div>
-        </div>
+        {/* Progress Summary Card */}
+        <ProgressSummaryCard completedIds={completedIds} currentDay={currentDay} />
+
+        {/* Certification Path */}
+        <CertificationPath completedIds={completedIds} currentDay={currentDay} />
 
         {loading && (
           <div className="flex items-center justify-center py-20 gap-3" style={{ color: 'var(--color-text-muted)' }}>
@@ -185,28 +358,63 @@ export default function Dashboard() {
               <div className="flex items-center gap-3 mb-3">
                 <h2 className="font-display font-semibold" style={{ fontSize: 'var(--text-title-3)', color: locked ? 'var(--color-text-muted)' : 'var(--color-text)' }}>Day {day}</h2>
                 {dayDone && <Badge className="bg-green-100 text-green-800">Complete</Badge>}
-                {locked && <Badge variant="outline">Locked</Badge>}
+                {locked && <Badge variant="outline"><Lock size={11} className="mr-1" />Locked</Badge>}
+                {!dayDone && !locked && (
+                  <Badge style={{ backgroundColor: 'rgba(30,64,175,0.08)', color: 'var(--color-primary)', border: 'none' }}>In Progress</Badge>
+                )}
               </div>
               <div className="space-y-3">
                 {dayLessons.map(lesson => {
                   const done = completedIds.includes(lesson.id)
                   const Icon = TYPE_ICON[lesson.type] || BookOpen
                   return (
-                    <Card key={lesson.id} className={locked ? 'opacity-50' : ''}>
+                    <Card
+                      key={lesson.id}
+                      className={locked ? 'opacity-40' : done ? '' : ''}
+                      style={{
+                        borderColor: done ? 'rgba(5,150,105,0.3)' : locked ? 'var(--color-border)' : 'var(--color-border)',
+                        backgroundColor: done ? 'rgba(5,150,105,0.04)' : 'var(--color-bg-surface)',
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
                       <CardContent className="py-4 flex items-center gap-4">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: done ? 'rgba(5,150,105,0.1)' : 'rgba(30,64,175,0.08)' }}>
-                          <Icon size={20} style={{ color: done ? 'var(--color-accent)' : 'var(--color-primary)' }} />
+                        <div
+                          className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: done ? 'rgba(5,150,105,0.12)' : 'rgba(30,64,175,0.08)' }}
+                        >
+                          <Icon size={20} style={{ color: done ? 'var(--color-accent)' : 'var(--color-primary)', opacity: locked ? 0.5 : 1 }} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium" style={{ color: 'var(--color-text)', fontSize: 'var(--text-subhead)' }}>{lesson.title}</p>
+                          <p
+                            className="font-medium"
+                            style={{
+                              color: done ? 'var(--color-text-muted)' : 'var(--color-text)',
+                              fontSize: 'var(--text-subhead)',
+                              textDecoration: done ? 'line-through' : 'none',
+                              opacity: done ? 0.7 : 1,
+                            }}
+                          >
+                            {lesson.title}
+                          </p>
                           <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{lesson.duration_minutes} min · {lesson.type}</p>
                         </div>
-                        {done
-                          ? <CheckCircle size={20} style={{ color: 'var(--color-success)' }} aria-label="Completed" />
-                          : <Button size="sm" disabled={locked || marking === lesson.id} onClick={() => markComplete(lesson.id)}>
-                              {marking === lesson.id ? <Loader2 size={14} className="animate-spin" /> : <><Circle size={14} className="mr-1" />Start</>}
-                            </Button>
-                        }
+                        {done ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold" style={{ color: 'var(--color-accent)' }}>Done</span>
+                            <CheckCircle size={20} style={{ color: 'var(--color-accent)' }} aria-label="Completed" />
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            disabled={locked || marking === lesson.id}
+                            onClick={() => markComplete(lesson.id)}
+                          >
+                            {marking === lesson.id
+                              ? <Loader2 size={14} className="animate-spin" />
+                              : <><Circle size={14} className="mr-1" />Start</>
+                            }
+                          </Button>
+                        )}
                       </CardContent>
                     </Card>
                   )
@@ -216,7 +424,8 @@ export default function Dashboard() {
           )
         })}
 
-        {completedCount === totalLessons && (
+        {/* Certificate Card — only shown when all 9 lessons complete */}
+        {allComplete && (
           <Card className="mt-8 border-2" style={{ borderColor: 'var(--color-accent)' }}>
             <CardContent className="py-8 text-center">
               <Award size={48} className="mx-auto mb-4" style={{ color: 'var(--color-accent)' }} />

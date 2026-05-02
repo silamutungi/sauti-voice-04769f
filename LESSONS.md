@@ -40,6 +40,8 @@ It is a 5-day onboarding, training, and certification platform that helps Kenyan
 
 - [2026-05-02] Wrap the app logo in the nav component with a React Router Link to '/' so clicking it returns to the → src/components/Navbar.tsx
 
+- [2026-05-02] The dashboard has an error that says "Failed to load progress. Please try again" Fix → src/pages/Dashboard.tsx, src/lib/supabase.ts
+
 ## Brain Observations
 <!-- Proactive hints Brain has surfaced -->
 <!-- Format: [date] category: observation -->
